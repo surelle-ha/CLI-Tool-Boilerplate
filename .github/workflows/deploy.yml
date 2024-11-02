@@ -28,25 +28,20 @@ jobs:
               run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
 
             - run: npm install --legacy-peer-deps
-
             - run: tsc --build
 
-            - name: Check if version already exists
-              id: version_check
+            - name: Increment version if exists
               run: |
-                  PACKAGE_VERSION=$(node -p "require('./package.json').version")
-                  if npm view @${{ github.repository_owner }}/$(node -p "require('./package.json').name")@$PACKAGE_VERSION &>/dev/null; then
-                      echo "::set-output name=version_exists::true"
+                  PACKAGE_NAME=$(jq -r .name package.json)
+                  PACKAGE_VERSION=$(jq -r .version package.json)
+                  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    "https://npm.pkg.github.com/@${{ github.repository_owner }}/$PACKAGE_NAME@$PACKAGE_VERSION")
+                  if [ "$RESPONSE" -eq 200 ]; then
+                    echo "Version $PACKAGE_VERSION exists. Bumping version."
+                    npm version patch
                   else
-                      echo "::set-output name=version_exists::false"
-                  fi
-
-            - name: Publish package
-              if: steps.version_check.outputs.version_exists == 'false'
-              run: npm publish
+                    echo "Version $PACKAGE_VERSION does not exist. Proceeding with publish."
+              
+            - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Report success
-              if: steps.version_check.outputs.version_exists == 'true'
-              run: echo "Version already exists. Skipping publish step."
