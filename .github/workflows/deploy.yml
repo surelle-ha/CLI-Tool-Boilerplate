@@ -28,7 +28,25 @@ jobs:
               run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
 
             - run: npm install --legacy-peer-deps
+
             - run: tsc --build
-            - run: npm publish
+
+            - name: Check if version already exists
+              id: version_check
+              run: |
+                  PACKAGE_VERSION=$(node -p "require('./package.json').version")
+                  if npm view @${{ github.repository_owner }}/$(node -p "require('./package.json').name")@$PACKAGE_VERSION &>/dev/null; then
+                      echo "::set-output name=version_exists::true"
+                  else
+                      echo "::set-output name=version_exists::false"
+                  fi
+
+            - name: Publish package
+              if: steps.version_check.outputs.version_exists == 'false'
+              run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Report success
+              if: steps.version_check.outputs.version_exists == 'true'
+              run: echo "Version already exists. Skipping publish step."
