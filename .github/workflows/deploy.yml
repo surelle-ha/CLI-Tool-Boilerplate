@@ -38,17 +38,17 @@ jobs:
                   RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                     "https://npm.pkg.github.com/@${{ github.repository_owner }}/$PACKAGE_NAME@$PACKAGE_VERSION")
                   if [ "$RESPONSE" -eq 200 ]; then
-                    echo "::set-output name=exists::true"
+                    echo "exists=true" >> $GITHUB_ENV
                   else
-                    echo "::set-output name=exists::false"
+                    echo "exists=false" >> $GITHUB_ENV
                   fi
 
             - name: Publish package
-              if: steps.check_version.outputs.exists == 'false'
+              if: env.exists == 'false'
               run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Report existing version
-              if: steps.check_version.outputs.exists == 'true'
+              if: env.exists == 'true'
               run: echo "Package version already exists. Skipping publish."
