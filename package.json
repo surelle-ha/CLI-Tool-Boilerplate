@@ -2,9 +2,9 @@
     "name": "@surelle-ha/hero",
     "version": "1.0.1",
     "author": "surelle-ha",
-    "description": "This is a boilerplate for CLI tools..",
+    "description": "Hero is a boilerplate for developing CLI tools.",
     "repository": {
-        "url": "https://github.com/surelle-ha/CLI-Tool-Boilerplate.git"
+        "url": "https://github.com/surelle-ha/Hero-Boilerplate.git"
     },
     "keywords": [
         "cli"

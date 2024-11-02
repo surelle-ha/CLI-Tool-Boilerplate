@@ -10,7 +10,9 @@ const program = new Command();
 program
     .name("hero")
     .description(
-        chalk.green(wrapAnsi("This is a boilerplate for CLI tools. ", 65))
+        chalk.green(
+            wrapAnsi("Hero is a boilerplate for developing CLI tools.", 65)
+        )
     )
     .version("1.6.0");
 
@@ -20,7 +22,7 @@ const isDefaultCommand = process.argv.length === 2;
 
 if (isDefaultCommand) {
     figlet(
-        "CLI Boilerplate",
+        "Hero Boilerplate",
         {
             font: "cybermedium",
             width: 80,
